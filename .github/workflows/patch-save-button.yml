@@ -1,0 +1,87 @@
+name: Patch modified-file download button
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-save-button.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Patch editor
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          s = s.replace("save:'Kaydet'", "save:'Düzenlenmiş Dosyayı İndir'")
+          s = s.replace("save:'Save'", "save:'Download Modified File'")
+          s = s.replace('<button class="primary" id="save"></button>', '<button class="primary" id="save" disabled></button>')
+          s = s.replace('button{cursor:pointer}button.primary', 'button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button.primary')
+
+          old_state = "let SQL=null,format=null,sourceFile=null,zip=null,db=null,scmEntries=null,scmMapEntry=null,channels=[],originalState=null,selected=new Set(),lastClicked=null,filterType='all',dragId=null,pickOrder=[];"
+          new_state = old_state[:-1] + ',dirty=false;'
+          s = s.replace(old_state, new_state)
+
+          set_edit = "const setEdit=(m,c='')=>{$('editStatus').className='status '+c;$('editStatus').textContent=m};"
+          if 'function setDirty(' not in s:
+              s = s.replace(set_edit, set_edit + "\nfunction setDirty(v=true){dirty=!!v;$('save').disabled=!dirty}")
+
+          s = s.replace(
+              "function restoreSnapshot(){for(const s of originalState){const c=channels.find(x=>x.id===s.id);if(c){c.major=s.major;c.deleted=s.deleted}}selected.clear();render()}",
+              "function restoreSnapshot(){for(const s of originalState){const c=channels.find(x=>x.id===s.id);if(c){c.major=s.major;c.deleted=s.deleted}}selected.clear();setDirty(false);render()}"
+          )
+
+          s = s.replace(
+              "no.onchange=()=>{c.major=Math.max(0,Number(no.value)||0);updateChips()};",
+              "no.onchange=()=>{const next=Math.max(0,Number(no.value)||0);if(next!==c.major){c.major=next;setDirty(true)}updateChips()};"
+          )
+
+          s = s.replace('rest.forEach((c,i)=>c.major=start+i);render()', 'rest.forEach((c,i)=>c.major=start+i);setDirty(true);render()')
+          s = s.replace('function renumberList(list,start){list.forEach((c,i)=>c.major=start+i);render()}', 'function renumberList(list,start){list.forEach((c,i)=>c.major=start+i);setDirty(true);render()}')
+          s = s.replace('full.forEach((c,i)=>c.major=first+i);\n render();', 'full.forEach((c,i)=>c.major=first+i);\n setDirty(true);render();')
+          s = s.replace('list.forEach(c=>c.deleted=true);selected.clear();render()}', 'list.forEach(c=>c.deleted=true);selected.clear();setDirty(true);render()}')
+
+          s = s.replace("originalState=snapshot();$('intro').classList.add('hidden');", "originalState=snapshot();setDirty(false);$('intro').classList.add('hidden');")
+          s = s.replace(
+              "$('restoreSelected').onclick=()=>{channels.filter(c=>selected.has(c.id)).forEach(c=>c.deleted=false);render()};",
+              "$('restoreSelected').onclick=()=>{const list=channels.filter(c=>selected.has(c.id)&&c.deleted);if(list.length){list.forEach(c=>c.deleted=false);setDirty(true)}render()};"
+          )
+
+          s = s.replace('async function saveFile(){try{\n const normalized=ensureUniqueActiveNumbers();', 'async function saveFile(){try{\n if(!dirty)return;\n const normalized=ensureUniqueActiveNumbers();')
+          s = s.replace("download(blob,name);setEdit(trn().saved(name),'ok')}", "download(blob,name);setDirty(false);setEdit(trn().saved(name),'ok')}", 2)
+
+          # Normalize accidental double escaping in JS single-quoted strings.
+          s = s.replace("\\\\'", "\\'")
+
+          p.write_text(s, encoding='utf-8')
+
+          scripts = re.findall(r'<script>(.*?)</script>', s, re.S)
+          Path('/tmp/editor.js').write_text('\n'.join(scripts), encoding='utf-8')
+          subprocess.run(['node', '--check', '/tmp/editor.js'], check=True)
+          PY
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Improve modified-file download button state'
+          git push origin main
