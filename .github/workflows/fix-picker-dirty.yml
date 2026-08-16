@@ -1,0 +1,67 @@
+name: Fix search-order dirty state
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-picker-dirty.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Patch search-order apply flow
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # The search-based ordering flow assigns the complete active list from `first`
+          # and then renders. Mark that operation as a real edit so the download button enables.
+          pat = re.compile(r"(full\.forEach\(\(c,i\)=>c\.major=first\+i\);)(\s*)(?!setDirty\(true\);)(render\(\);)")
+          s2, n = pat.subn(r"\1\2setDirty(true);\2\3", s, count=1)
+
+          if n != 1:
+              # Accept an already-fixed file, otherwise fail instead of silently changing the wrong code.
+              if not re.search(r"full\.forEach\(\(c,i\)=>c\.major=first\+i\);\s*setDirty\(true\);\s*render\(\);", s):
+                  m = re.search(r".{0,220}pickerApply.{0,1200}", s, re.S)
+                  print('PICKER_CONTEXT:', m.group(0) if m else 'not found')
+                  raise RuntimeError(f'Expected exactly one search-order apply sequence, patched {n}')
+              s2 = s
+
+          # Verify the helper exists and the target path is dirty-aware.
+          if s2.count('function setDirty(') != 1:
+              raise RuntimeError('setDirty helper missing or duplicated')
+          if not re.search(r"full\.forEach\(\(c,i\)=>c\.major=first\+i\);\s*setDirty\(true\);\s*render\(\);", s2):
+              raise RuntimeError('search-order flow still does not mark dirty')
+
+          p.write_text(s2, encoding='utf-8')
+
+          scripts = re.findall(r'<script>(.*?)</script>', s2, re.S)
+          Path('/tmp/editor.js').write_text('\n'.join(scripts), encoding='utf-8')
+          subprocess.run(['node', '--check', '/tmp/editor.js'], check=True)
+          print('PICKER_DIRTY_FIX_OK')
+          PY
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No index.html changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Enable download after search-based ordering'
+          git push origin main
