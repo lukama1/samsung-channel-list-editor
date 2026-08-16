@@ -5,12 +5,18 @@ Browser-based editor for reordering Samsung satellite channels stored in `Channe
 
 Samsung `Channel_list_*.zip` dosyalarındaki uydu kanallarını tarayıcı üzerinden sıralamak için hazırlanmış açık kaynak web editörü.
 
+## Live Demo / Canlı Demo
+
+**https://lukama1.github.io/samsung-channel-list-editor/**
+
 ## Türkçe
 
 ### Özellikler
 - `Channel_list_*.zip` dosyasını tarayıcıda açar.
 - ZIP içindeki `dvbs` SQLite veritabanından kanalları listeler.
 - Kanal numarası değiştirme ve sürükle-bırak sıralama yapar.
+- Türkçe / İngilizce arayüz seçimi sunar.
+- ZIP başarıyla açıldığında açıklama ve dosya yükleme alanı kapanarak kanal editörüne odaklanır.
 - Düzenlenmiş listeyi yeniden ZIP olarak kaydeder.
 - Kanal dosyası sunucuya yüklenmez; tarayıcı belleğinde işlenir.
 - Güvenlik amacıyla yalnız `SRV.major` kanal sıra numarası değiştirilir. Frekans, PID, transponder ve kanal adına dokunulmaz.
@@ -39,7 +45,7 @@ Bu sürüm özellikle **DVB-S / uydu kanal sıralaması** için hazırlanmışt�
 ### Kullanım
 1. TV'de kanal taramasını tamamlayın.
 2. Kanal listesini USB'ye dışa aktarın.
-3. Web editörünü açın.
+3. Canlı demo sayfasını açın.
 4. `Channel_list_*.zip` dosyasını sayfaya bırakın.
 5. Kanalları sıralayın.
 6. Düzenlenmiş ZIP'i kaydedin.
@@ -52,6 +58,8 @@ Bu sürüm özellikle **DVB-S / uydu kanal sıralaması** için hazırlanmışt�
 - Opens Samsung `Channel_list_*.zip` exports in the browser.
 - Reads channels from the `dvbs` SQLite database.
 - Supports direct channel-number editing and drag-and-drop ordering.
+- Provides a Turkish / English interface switcher.
+- After a ZIP opens successfully, the introduction and upload panels collapse so the page focuses on the editor.
 - Exports the modified list back to ZIP.
 - The TV channel-list file is processed locally in browser memory and is not uploaded to a server.
 - For safety, this version only changes the `SRV.major` channel number. It does not alter frequencies, PIDs, transponders or channel names.
@@ -80,7 +88,7 @@ This build focuses on **DVB-S / satellite channel ordering**.
 ### Usage
 1. Complete the channel scan on the TV.
 2. Export the channel list to USB.
-3. Open the web editor.
+3. Open the live demo.
 4. Drop the `Channel_list_*.zip` file onto the page.
 5. Reorder the channels.
 6. Save the modified ZIP.
@@ -88,10 +96,9 @@ This build focuses on **DVB-S / satellite channel ordering**.
 8. Import the modified ZIP back into the TV.
 
 ## GitHub Pages
-This repository is ready for GitHub Pages. Publish the `main` branch from `/ (root)`.
+Published from the `main` branch at `/ (root)`.
 
-Public address after Pages is enabled:
-`https://lukama1.github.io/samsung-channel-list-editor/`
+**Live demo:** https://lukama1.github.io/samsung-channel-list-editor/
 
 ## Privacy / Gizlilik
 The selected channel-list archive is processed locally. JSZip and sql.js are loaded from jsDelivr CDN.
