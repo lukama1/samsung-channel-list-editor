@@ -7,7 +7,10 @@ Eski Samsung `.scm` kanal listeleri ile yeni `Channel_list_*.zip` + SQLite kanal
 
 ## Live Demo / Canlı Demo
 
-<a href="https://lukama1.github.io/samsung-channel-list-editor/" target="_blank" rel="noopener noreferrer"><strong>Open Live Demo / Canlı Demoyu Aç</strong></a>
+**[Open Live Demo / Canlı Demoyu Aç](https://lukama1.github.io/samsung-channel-list-editor/)**
+
+> GitHub README sayfaları bağlantıları zorla yeni sekmede açtırmaya izin vermez. Yeni sekmede açmak için macOS'ta **⌘ Cmd + tık**, Windows/Linux'ta **Ctrl + tık** kullanabilirsiniz.  
+> GitHub README pages do not allow repositories to force links to open in a new tab. Use **⌘ Cmd + click** on macOS or **Ctrl + click** on Windows/Linux.
 
 ## Desteklenen formatlar / Supported formats
 
@@ -86,12 +89,12 @@ The channel-list file is processed locally in browser memory and is not uploaded
 
 SCM formatı ve arayüz davranışları için referans:
 
-- <a href="https://github.com/iltekin/scm-editor" target="_blank" rel="noopener noreferrer">iltekin/scm-editor — GitHub</a>
-- <a href="https://iltekin.github.io/scm-editor/" target="_blank" rel="noopener noreferrer">SCM Editor — Live Demo</a>
+- [iltekin/scm-editor — GitHub](https://github.com/iltekin/scm-editor)
+- [SCM Editor — Live Demo](https://iltekin.github.io/scm-editor/)
 
 Samsung ZIP / SQLite formatı için referans:
 
-- <a href="https://github.com/PredatH0r/ChanSort" target="_blank" rel="noopener noreferrer">PredatH0r/ChanSort — GitHub</a>
+- [PredatH0r/ChanSort — GitHub](https://github.com/PredatH0r/ChanSort)
 
 ## Disclaimer / Sorumluluk reddi
 
